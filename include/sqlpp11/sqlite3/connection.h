@@ -32,15 +32,15 @@
 #else
 #include <sqlite3.h>
 #endif
-#include <sqlpp11/connection.h>
+#include "connection.h"
 #include <sqlpp11/schema.h>
 #include <sqlpp11/serialize.h>
-#include <sqlpp11/sqlite3/bind_result.h>
-#include <sqlpp11/sqlite3/connection_config.h>
-#include <sqlpp11/sqlite3/prepared_statement.h>
+#include "bind_result.h"
+#include "connection_config.h"
+#include "prepared_statement.h"
 #include <sqlpp11/transaction.h>
 #include <sqlpp11/type_traits.h>
-#include <sqlpp11/sqlite3/export.h>
+#include "export.h"
 #include <sstream>
 #include <string>
 

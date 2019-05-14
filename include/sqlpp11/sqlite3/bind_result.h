@@ -29,7 +29,7 @@
 
 #include <memory>
 #include <sqlpp11/chrono.h>
-#include <sqlpp11/sqlite3/export.h>
+#include "export.h"
 
 #ifdef _MSC_VER
 #pragma warning(push)
