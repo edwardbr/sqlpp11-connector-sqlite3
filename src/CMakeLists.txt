@@ -57,7 +57,7 @@ endif()
 
 if (SQLCIPHER)
     target_compile_definitions(${PROJECT_NAME} PUBLIC SQLPP_USE_SQLCIPHER)
-    target_link_libraries(${PROJECT_NAME} SQLCipher::SQLCipher)
+    target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}::${PROJECT_NAME})
     if (SQLPP_DYNAMIC_LOADING)
         target_compile_definitions(${PROJECT_NAME}-dynamic PUBLIC SQLPP_USE_SQLCIPHER)
         target_include_directories(${PROJECT_NAME}-dynamic PUBLIC ${SQLCIPHER_INCLUDE_DIRS})
