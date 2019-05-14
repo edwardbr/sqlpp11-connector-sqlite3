@@ -27,7 +27,7 @@
 #ifndef SQLPP_SQLITE3_H
 #define SQLPP_SQLITE3_H
 
-#include <connection.h>
-#include <insert_or.h>
+#include "connection.h"
+#include "insert_or.h"
 
 #endif
