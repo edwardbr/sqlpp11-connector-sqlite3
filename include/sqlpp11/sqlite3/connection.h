@@ -347,6 +347,6 @@ namespace sqlpp
 #pragma warning(pop)
 #endif
 
-#include <sqlpp11/sqlite3/serializer.h>
+#include "serializer.h"
 
 #endif
