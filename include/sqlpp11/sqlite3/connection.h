@@ -32,7 +32,7 @@
 #else
 #include <sqlite3.h>
 #endif
-#include "connection.h"
+#include <sqlpp11/connection.h>
 #include <sqlpp11/schema.h>
 #include <sqlpp11/serialize.h>
 #include "bind_result.h"
