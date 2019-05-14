@@ -22,50 +22,54 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-cmake_minimum_required(VERSION 3.2)
-include(CheckCXXSymbolExists)
-project (sqlpp11-connector-sqlite3)
+cmake_minimum_required(VERSION 3.10.2)
+
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
+include(HunterGate)
+HunterGate(
+    URL "https://github.com/ruslo/hunter/archive/v0.23.165.tar.gz"
+    SHA1 "5a73f91df5f6109c0bb1104d0c0ee423f7bece79"
+    LOCAL
+)
+
+
+project (sqlpp11-connector-sqlite3 VERSION 0.29)
+
 enable_testing()
+
 set(CMAKE_CXX_STANDARD 11)
 
 option(ENABLE_TESTS "Build unit tests" On)
 option(BUILD_SHARED_LIBS "Build shared libraries" Off)
-option(SQLCIPHER "Build with SQLCipher" Off)
+option(SQLCIPHER "Build with sqlcipher" Off)
 
 if (NOT DEFINED SQLPP11_DYNAMIC_LOADING)
    set(SQLPP11_DYNAMIC_LOADING Off)
 endif()
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+hunter_add_package(date)
+find_package(date REQUIRED)
+
 if(SQLCIPHER )
-	find_package(SQLCipher REQUIRED)
+	hunter_add_package(OpenSSL)
+	find_package(OpenSSL REQUIRED)
+	hunter_add_package(sqlcipher)
+	find_package(sqlcipher REQUIRED)
+
 	set (SQLITE3_LIBRARIES "${SQLCIPHER_LIBRARIES}" )
 	set (SQLITE3_INCLUDE_DIRS "${SQLCIPHER_INCLUDE_DIRS}" )
     set (SQLITE3_LIBRARY "${SQLCIPHER_LIBRARY}")
 else()
-	find_package(Sqlite3 REQUIRED)
+	hunter_add_package(sqlite3)
+	find_package(sqlite3 REQUIRED)
 endif()
-
-find_package(HinnantDate REQUIRED)
 
 message(STATUS "Using ${CMAKE_CXX_COMPILER} (compiler id: ${CMAKE_CXX_COMPILER_ID})")
 
-set(SQLPP11_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../sqlpp11/include" CACHE FILEPATH "Path to sqlpp11 includes")
-
-if(NOT EXISTS ${SQLPP11_INCLUDE_DIR}/sqlpp11/sqlpp11.h)
-	message(SEND_ERROR "Can't find file sqlpp11/sqlpp11.h")
-	message("Can't find sqlpp11/sqlpp11.h in ${SQLPP11_INCLUDE_DIR} ")
-	message("Please either")
-	message("  - git clone https://github.com/rbock/sqlpp11 ${SQLPP11_INCLUDE_DIR}")
-	message("  - download and unzip a current version from https://github.com/rbock/sqlpp11 to ${SQLPP11_INCLUDE_DIR}")
-	message("  - set SQLPP11_INCLUDE_DIR to point to the dir containing sqlpp11/sqlpp11.h")
-	message("")
-else()
-	message("including sqlpp11 from ${SQLPP11_INCLUDE_DIR}")
-endif()
 
 set(include_dir "${PROJECT_SOURCE_DIR}/include")
-file(GLOB_RECURSE sqlpp_headers ${include_dir}/*.h ${SQLPP11_INCLUDE_DIR}/*.h)
 
 add_subdirectory(src)
 
@@ -73,5 +77,68 @@ if(ENABLE_TESTS)
 	add_subdirectory(tests)
 endif()
 
-install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/sqlpp11" DESTINATION include)
 
+set(pc_config "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc")
+configure_file(${PROJECT_NAME}.pc.in ${pc_config} @ONLY)
+
+set(la_config "${CMAKE_CURRENT_BINARY_DIR}/lib${PROJECT_NAME}.la")
+configure_file(lib${PROJECT_NAME}.la.in ${la_config} @ONLY)
+
+# Installation (https://github.com/forexample/package-example) {
+
+set(config_install_dir "lib/cmake/${PROJECT_NAME}")
+set(include_install_dir "include")
+
+set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
+
+set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
+set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
+set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
+set(namespace "${PROJECT_NAME}::")
+
+include(CMakePackageConfigHelpers)
+
+# Use:
+#   * PROJECT_VERSION
+write_basic_package_version_file(
+    "${version_config}" COMPATIBILITY SameMajorVersion
+)
+
+# Use variables:
+#   * TARGETS_EXPORT_NAME
+#   * PROJECT_NAME
+configure_package_config_file(
+    "cmake/Config.cmake.in"
+    "${project_config}"
+    INSTALL_DESTINATION "${config_install_dir}"
+)
+
+install(
+    TARGETS ${PROJECT_NAME}
+    EXPORT "${TARGETS_EXPORT_NAME}"
+    LIBRARY DESTINATION "lib"
+    ARCHIVE DESTINATION "lib"
+    RUNTIME DESTINATION "bin"
+    INCLUDES DESTINATION "${include_install_dir}"
+)
+
+install(
+    FILES ${headers}
+    DESTINATION "${include_install_dir}/${PROJECT_NAME}"
+)
+
+install(
+    FILES "${project_config}" "${version_config}"
+    DESTINATION "${config_install_dir}"
+)
+
+install(
+    EXPORT "${TARGETS_EXPORT_NAME}"
+    NAMESPACE "${namespace}"
+    DESTINATION "${config_install_dir}"
+)
+
+install(FILES ${pc_config} DESTINATION lib/pkgconfig)
+install(FILES ${la_config} DESTINATION lib)
+
+# }
