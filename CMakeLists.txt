@@ -34,7 +34,6 @@ HunterGate(
     LOCAL
 )
 
-
 project (sqlpp11-connector-sqlite3 VERSION 0.29)
 
 enable_testing()
@@ -56,6 +55,7 @@ hunter_add_package(Sqlpp11)
 find_package(Sqlpp11 REQUIRED)
 
 if(SQLCIPHER )
+    message(STATUS "using crypt")
 	hunter_add_package(OpenSSL)
 	find_package(OpenSSL REQUIRED)
 	hunter_add_package(sqlcipher)
@@ -67,7 +67,8 @@ if(SQLCIPHER )
     set_property(TARGET sqlcipher::sqlcipher PROPERTY INTERFACE_COMPILE_DEFINITIONS SQLITE_HAS_CODEC)
     set_property(TARGET sqlcipher::sqlcipher APPEND PROPERTY INTERFACE_COMPILE_DEFINITIONS "SQLITE_TEMPSTORE=2")
 else()
-	hunter_add_package(sqlite3)
+    message(STATUS "not using crypt")
+    hunter_add_package(sqlite3)
 	find_package(sqlite3 REQUIRED)
 endif()
 
