@@ -24,6 +24,9 @@
 
 cmake_minimum_required(VERSION 3.10.2)
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
@@ -40,13 +43,8 @@ enable_testing()
 
 set(CMAKE_CXX_STANDARD 11)
 
-option(ENABLE_TESTS "Build unit tests" On)
-option(BUILD_SHARED_LIBS "Build shared libraries" Off)
+option(ENABLE_TESTS "Build unit tests" Off)
 option(SQLCIPHER "Build with sqlcipher" Off)
-
-if (NOT DEFINED SQLPP11_DYNAMIC_LOADING)
-   set(SQLPP11_DYNAMIC_LOADING Off)
-endif()
 
 hunter_add_package(date)
 find_package(date REQUIRED)
@@ -56,8 +54,10 @@ find_package(Sqlpp11 REQUIRED)
 
 if(SQLCIPHER )
     message(STATUS "using crypt")
+
 	hunter_add_package(OpenSSL)
 	find_package(OpenSSL REQUIRED)
+
 	hunter_add_package(sqlcipher)
 	find_package(sqlcipher REQUIRED)
 
@@ -69,16 +69,40 @@ if(SQLCIPHER )
 else()
     message(STATUS "not using crypt")
     hunter_add_package(sqlite3)
-	find_package(sqlite3 REQUIRED)
+	find_package(sqlite3 CONFIG REQUIRED)
 endif()
 
-message(STATUS "Using ${CMAKE_CXX_COMPILER} (compiler id: ${CMAKE_CXX_COMPILER_ID})")
+add_library(${PROJECT_NAME} STATIC
+		src/connection.cpp
+		src/bind_result.cpp
 
+		src/prepared_statement.cpp
+		src/detail/connection_handle.cpp
+      )
 
-set(include_dir "${PROJECT_SOURCE_DIR}/include")
-file(GLOB_RECURSE sqlpp_headers ${include_dir}/*.h)
+target_link_libraries(${PROJECT_NAME}  
+    INTERFACE 
+        date_interface 
+	PUBLIC
+		sqlpp11
+) 
 
-add_subdirectory(src)
+target_include_directories(${PROJECT_NAME}  PUBLIC 
+							$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+							$<INSTALL_INTERFACE:include> )
+
+if (SQLCIPHER)
+    target_compile_definitions(${PROJECT_NAME} PUBLIC SQLPP_USE_SQLCIPHER)
+    target_link_libraries(${PROJECT_NAME} PUBLIC sqlcipher::sqlcipher)
+else()
+    target_link_libraries(${PROJECT_NAME} PUBLIC sqlite3::sqlite3)
+endif()
+
+install(TARGETS ${PROJECT_NAME}
+        ARCHIVE DESTINATION lib
+        LIBRARY DESTINATION lib
+        RUNTIME DESTINATION bin)
+
 
 if(ENABLE_TESTS)
 	add_subdirectory(tests)
@@ -102,6 +126,9 @@ set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
 set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
 set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
 set(namespace "${PROJECT_NAME}::")
+
+set(include_dir "${PROJECT_SOURCE_DIR}/include")
+file(GLOB_RECURSE sqlpp_headers ${include_dir}/*.h)
 
 include(CMakePackageConfigHelpers)
 
