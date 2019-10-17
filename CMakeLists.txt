@@ -22,10 +22,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-cmake_minimum_required(VERSION 3.10.2)
-
-set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+cmake_minimum_required(VERSION 3.13)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
@@ -37,7 +34,7 @@ HunterGate(
     LOCAL
 )
 
-project (sqlpp11-connector-sqlite3 VERSION 0.29)
+project (sqlpp11-connector-sqlite3 VERSION 0.29 LANGUAGES CXX)
 
 enable_testing()
 
@@ -115,8 +112,6 @@ configure_file(${PROJECT_NAME}.pc.in ${pc_config} @ONLY)
 set(la_config "${CMAKE_CURRENT_BINARY_DIR}/lib${PROJECT_NAME}.la")
 configure_file(lib${PROJECT_NAME}.la.in ${la_config} @ONLY)
 
-# Installation (https://github.com/forexample/package-example) {
-
 set(config_install_dir "lib/cmake/${PROJECT_NAME}")
 set(include_install_dir "include")
 
@@ -175,4 +170,3 @@ install(
 install(FILES ${pc_config} DESTINATION lib/pkgconfig)
 install(FILES ${la_config} DESTINATION lib)
 
-# }
