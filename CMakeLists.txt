@@ -34,7 +34,7 @@ HunterGate(
     LOCAL
 )
 
-project (sqlpp11-connector-sqlite3 VERSION 0.29 LANGUAGES CXX)
+project (sqlpp11-sqlite3 VERSION 0.29 LANGUAGES CXX)
 
 enable_testing()
 
@@ -106,11 +106,11 @@ if(ENABLE_TESTS)
 endif()
 
 
-set(pc_config "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc")
-configure_file(${PROJECT_NAME}.pc.in ${pc_config} @ONLY)
+#set(pc_config "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc")
+#configure_file(${PROJECT_NAME}.pc.in ${pc_config} @ONLY)
 
-set(la_config "${CMAKE_CURRENT_BINARY_DIR}/lib${PROJECT_NAME}.la")
-configure_file(lib${PROJECT_NAME}.la.in ${la_config} @ONLY)
+#set(la_config "${CMAKE_CURRENT_BINARY_DIR}/lib${PROJECT_NAME}.la")
+#configure_file(lib${PROJECT_NAME}.la.in ${la_config} @ONLY)
 
 set(config_install_dir "lib/cmake/${PROJECT_NAME}")
 set(include_install_dir "include")
@@ -167,6 +167,6 @@ install(
     DESTINATION "${config_install_dir}"
 )
 
-install(FILES ${pc_config} DESTINATION lib/pkgconfig)
-install(FILES ${la_config} DESTINATION lib)
+#install(FILES ${pc_config} DESTINATION lib/pkgconfig)
+#install(FILES ${la_config} DESTINATION lib)
 
